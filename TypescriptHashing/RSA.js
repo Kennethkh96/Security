@@ -1,6 +1,8 @@
 "use strict";
 var RSA = /** @class */ (function () {
     function RSA() {
+        this.minPrime = 500;
+        this.maxPrime = 700;
         var keys = this.GenerateKeys();
         this.pk = keys.pk;
         this.sk = keys.sk;
@@ -15,12 +17,10 @@ var RSA = /** @class */ (function () {
     };
     RSA.prototype.Encrypt = function (n) {
         console.log("starting encryption...");
-        //return Math.pow(n, this.pk.key) % this.pk.n;
         return this.powermod(n, this.pk.key, this.pk.n);
     };
     RSA.prototype.Decrypt = function (c) {
         console.log("starting decryption...");
-        //let decrypted = Math.pow(c, this.sk.key) % this.sk.n;
         var decrypted = this.powermod(c, this.sk.key, this.sk.n);
         console.log("Decrypted message: " + decrypted);
         return decrypted;
@@ -33,11 +33,11 @@ var RSA = /** @class */ (function () {
         return baseNumb;
     };
     RSA.prototype.GenerateKeys = function () {
-        var p = this.FindPrime(500, 700);
-        var q;
-        do {
-            q = this.FindPrime(500, 700);
-        } while (q == p);
+        var p = this.FindPrime();
+        var q = this.FindPrime();
+        while (q == p) {
+            q = this.FindPrime();
+        }
         console.log("found p: " + p);
         console.log("found q: " + q);
         var n = p * q;
@@ -72,9 +72,9 @@ var RSA = /** @class */ (function () {
             return a;
         return this.gcd(b, a % b);
     };
-    RSA.prototype.FindPrime = function (min, max) {
+    RSA.prototype.FindPrime = function () {
         var prime = 0;
-        var index = (2 * Math.floor(Math.random() * max) + min) + 1;
+        var index = (2 * Math.floor(Math.random() * this.maxPrime) + this.minPrime) + 1;
         while (!this.IsPrime(index)) {
             index += 2;
         }
@@ -104,6 +104,6 @@ var RsaKey = /** @class */ (function () {
     }
     return RsaKey;
 }());
-var test = new RSA();
-var t = test.Sign(25);
-console.log(test.Verify(t));
+var rsa = new RSA();
+var t = rsa.Encrypt(25555);
+console.log(rsa.Decrypt(t));

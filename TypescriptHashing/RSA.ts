@@ -2,6 +2,10 @@ class RSA
 {
     private sk: RsaKey;
     private pk: RsaKey;
+
+    private readonly minPrime = 500;
+    private readonly maxPrime = 700;
+
     constructor()
     {
         let keys = this.GenerateKeys();
@@ -26,14 +30,12 @@ class RSA
     public Encrypt(n: number)
     {
         console.log("starting encryption...");
-        //return Math.pow(n, this.pk.key) % this.pk.n;
         return this.powermod(n, this.pk.key, this.pk.n);
     }
 
     public Decrypt(c: number)
     {
         console.log("starting decryption...");
-        //let decrypted = Math.pow(c, this.sk.key) % this.sk.n;
         let decrypted = this.powermod(c, this.sk.key, this.sk.n);
         console.log("Decrypted message: " + decrypted);
         return decrypted;
@@ -53,11 +55,13 @@ class RSA
 
     GenerateKeys()
     {
-        let p = this.FindPrime(500, 700);
-        let q;
-        do {
-            q = this.FindPrime(500, 700);
-        } while(q == p)
+        let p = this.FindPrime();
+        let q = this.FindPrime();
+
+        while (q == p)
+        {
+            q = this.FindPrime();
+        }
 
         console.log("found p: " + p);
         console.log("found q: " + q);
@@ -110,10 +114,10 @@ class RSA
         return this.gcd(b, a % b);
     }
 
-    FindPrime(min: number, max: number): number
+    FindPrime(): number
     {
         let prime: number = 0;
-        let index: number = (2 * Math.floor(Math.random() * max) + min) + 1;
+        let index: number = (2 * Math.floor(Math.random() * this.maxPrime) + this.minPrime) + 1;
         while(!this.IsPrime(index))
         {
             index += 2;
@@ -155,6 +159,6 @@ class RsaKey
     }
 }
 
-let test = new RSA();
-let t = test.Sign(25);
-console.log(test.Verify(t));
+let rsa = new RSA();
+let t = rsa.Encrypt(25555);
+console.log(rsa.Decrypt(t));
